@@ -1,1 +1,75 @@
-rzrtzrtz
+/**
+* Example: Hello, MySQL!
+*
+* This code module demonstrates how to create a simple 
+* database-enabled sketch.
+*/
+#include "SPI.h"
+#include "Ethernet.h"
+#include "sha1.h"
+#include "mysql.h"
+
+/* Setup for Ethernet Library */
+byte mac_addr[] = { 0x08, 0x00, 0x2B, 0xEF, 0xFE, 0xCC };
+byte ipfix[] = {192, 168, 68, 47};             // static arduino IP
+IPAddress server_addr(192, 168, 68, 48);   //raspi007-Database ATTMON
+EthernetClient client;    
+/* Setup for the Connector/Arduino */
+Connector my_conn; // The Connector/Arduino reference
+
+char user[] = "";
+char password[] = "";
+//char INSERT_SQL[] = "INSERT INTO ATTMON.TAG_RECORDING VALUES ('123456789012345678', NULL,'Arduino Mega','Mega',NULL,NULL)";
+char INSERT_SQL[] = "INSERT INTO ATTMON.TAG_RECORDING (idTAG) VALUES (1111111121)";
+
+void setup() 
+{
+    // Start Ethernet with fix IP Address
+    Ethernet.begin(mac_addr,ipfix);
+    
+    // Start Ethernet connection mit DHCP
+    //Ethernet.begin(mac_addr);
+    //     if (Ethernet.begin(mac_addr) == 0) {
+    //  Serial.println("Failed to configure Ethernet using DHCP");
+    // no point in carrying on, so do nothing forevermore:
+    // for (;;)
+    //  ;
+    //}
+
+  Serial.begin(9600);
+  delay(100);
+  Serial.println("Connecting...");
+  if (my_conn.mysql_connect(server_addr, 3306, user, password))
+  {
+    delay(100);
+     /* Write INSERT_SQL Statement into MySQL Database */
+     my_conn.cmd_query(INSERT_SQL);
+     Serial.println("Query Success!"); 
+  } 
+  else
+    Serial.println("Connection failed.");
+printIPAddress();
+}
+
+void loop() 
+{
+//
+
+}
+
+
+void printIPAddress()
+{
+  Serial.print("My IP address: ");
+  //lcd.print("My IP address: ");
+  for (byte thisByte = 0; thisByte < 4; thisByte++) {
+    // print the value of each byte of the IP address:
+
+    Serial.print(Ethernet.localIP()[thisByte], DEC);
+    Serial.print(" ");
+  }
+
+  // lcd.println();
+  Serial.println();
+}
+
